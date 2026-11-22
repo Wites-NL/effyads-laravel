@@ -35,7 +35,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Warning in the log (debug mode) for zones missing from `effyads.zones`.
 
 ### Changed
-- All required `illuminate/*` components are now listed in `composer.json`.
+- All required `illuminate/*` components and `guzzlehttp/guzzle` are now listed in `composer.json`.
 - `sync/status` reports the installed package version instead of a hardcoded `1.0.0`.
 - Default platform URL is `https://app.effyads.com` everywhere.
 - `EFFYADS_QUEUE_CONNECTION` defaults to `sync` (no longer the app's
