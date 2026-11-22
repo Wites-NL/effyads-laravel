@@ -229,11 +229,11 @@ monorepo. The `Laravel package split` workflow mirrors that folder to the
 public, read-only repo [`Wites-NL/effyads-laravel`](https://github.com/Wites-NL/effyads-laravel),
 which [Packagist](https://packagist.org/packages/effyads/laravel) reads:
 
-- every push to `main` updates the split repo's `main` branch (`1.x-dev`);
+- every push to `master` updates the split repo's `main` branch (`1.x-dev`);
 - a monorepo tag `laravel-vX.Y.Z` becomes tag `vX.Y.Z` in the split repo,
   and Packagist publishes it as version `X.Y.Z`.
 
-To release: update `CHANGELOG.md`, merge to `main`, then
+To release: update `CHANGELOG.md`, merge `staging` into `master`, then
 `git tag laravel-v1.0.0 && git push origin laravel-v1.0.0`.
 
 The workflow needs the monorepo secret `EFFYADS_LARAVEL_SPLIT_TOKEN`: a
