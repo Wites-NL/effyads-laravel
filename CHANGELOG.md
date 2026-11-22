@@ -6,6 +6,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- Published on Packagist: `composer require effyads/laravel` works without extra repository setup.
 - Laravel 13 support.
 - Test suite (Orchestra Testbench) and a CI matrix for PHP 8.2–8.4 × Laravel 10–13.
 - `effyads:install` publishes `config/effyads.php`, prints every `.env` line

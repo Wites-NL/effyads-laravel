@@ -2,7 +2,18 @@
     "name": "effyads/laravel",
     "description": "EffyAds advertisement sync, rendering and click/view tracking for Laravel applications",
     "type": "library",
+    "keywords": [
+        "laravel",
+        "advertising",
+        "ads",
+        "effyads",
+        "blade"
+    ],
+    "homepage": "https://effyads.com",
     "license": "proprietary",
+    "support": {
+        "source": "https://github.com/Wites-NL/effyads-laravel"
+    },
     "require": {
         "php": "^8.1",
         "guzzlehttp/guzzle": "^7.2",

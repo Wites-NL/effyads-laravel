@@ -8,32 +8,13 @@ Supports Laravel 10, 11, 12 and 13 (PHP 8.1+, Laravel 13 needs PHP 8.3+).
 
 ## Installation
 
-The package is distributed privately through Private Packagist. You get a
-repository URL and an access token from EffyAds.
-
-### 1. Add the EffyAds package repository
-
-```bash
-composer config repositories.effyads composer https://repo.packagist.com/effyads/
-composer config --auth http-basic.repo.packagist.com token YOUR_TOKEN
-```
-
-The second command stores the token in `auth.json` next to `composer.json`.
-Do not commit that file: add `auth.json` to `.gitignore`, or use
-`composer config --global --auth ...` to store it for your user instead. On a
-server or in CI, set the `COMPOSER_AUTH` environment variable:
-
-```bash
-COMPOSER_AUTH='{"http-basic":{"repo.packagist.com":{"username":"token","password":"YOUR_TOKEN"}}}'
-```
-
-### 2. Install the package
+### 1. Install the package
 
 ```bash
 composer require effyads/laravel
 ```
 
-### 3. Run the installer
+### 2. Run the installer
 
 ```bash
 php artisan effyads:install
@@ -47,7 +28,7 @@ lines and asks whether to run the migrations. Options:
 | `--write-env` | Adds the lines to `.env` after confirmation. Existing values are never overwritten. |
 | `--show-key` | Shows the full key when one is already configured (it is masked by default). |
 
-### 4. Run the migrations
+### 3. Run the migrations
 
 ```bash
 php artisan migrate
@@ -55,7 +36,7 @@ php artisan migrate
 
 Skip this if you let the installer run them.
 
-### 5. Check your `.env`
+### 4. Check your `.env`
 
 ```dotenv
 EFFYADS_API_KEY=...            # printed by effyads:install
@@ -71,7 +52,7 @@ EFFYADS_QUEUE_CONNECTION=sync  # optional, sync is the default
   worker runs for that connection, otherwise events stay in the queue unsent.
   Failed sends are retried 3 times.
 
-### 6. Place an advertisement
+### 5. Place an advertisement
 
 Define zones in `config/effyads.php`:
 
@@ -101,10 +82,10 @@ Then render one in any view:
 - With `APP_DEBUG=true`, a zone that is not in `config('effyads.zones')` logs
   a warning.
 
-### 7. Connect the site in the dashboard
+### 6. Connect the site in the dashboard
 
 In the EffyAds dashboard, use **Connect a website** and enter a name, the
-site's URL and the API key from step 3.
+site's URL and the API key from step 2.
 
 The site must be **publicly reachable**: EffyAds calls it to push
 advertisements, so `localhost` or a `.test` domain does not work. To test
@@ -243,28 +224,22 @@ which POSTs to `{EFFYADS_PLATFORM_URL}/api/tracking`.
 
 ## Distribution (for EffyAds maintainers)
 
-The package lives in `laravel-package/` of the EffyAds monorepo. The
-`Laravel package split` workflow mirrors that folder to the private repo
-`Wites-NL/effyads-laravel`:
+The package is developed in `laravel-package/` of the private EffyAds
+monorepo. The `Laravel package split` workflow mirrors that folder to the
+public, read-only repo [`Wites-NL/effyads-laravel`](https://github.com/Wites-NL/effyads-laravel),
+which [Packagist](https://packagist.org/packages/effyads/laravel) reads:
 
 - every push to `main` updates the split repo's `main` branch (`1.x-dev`);
-- a monorepo tag `laravel-vX.Y.Z` becomes tag `vX.Y.Z` in the split repo.
-
-Private Packagist reads the split repo and serves the tagged versions to
-customers. Each customer gets their own token, so access can be revoked per
-customer.
+- a monorepo tag `laravel-vX.Y.Z` becomes tag `vX.Y.Z` in the split repo,
+  and Packagist publishes it as version `X.Y.Z`.
 
 To release: update `CHANGELOG.md`, merge to `main`, then
 `git tag laravel-v1.0.0 && git push origin laravel-v1.0.0`.
 
-The workflow needs the repository secret `EFFYADS_LARAVEL_SPLIT_TOKEN`: a
+The workflow needs the monorepo secret `EFFYADS_LARAVEL_SPLIT_TOKEN`: a
 fine-grained token with *Contents: read and write* on the split repo.
 
-**Alternative: Satis.** Instead of Private Packagist you can host a static
-Satis repository (for example behind HTTP basic auth) that points at the
-split repo. Customers then use that URL in step 1 with their own credentials.
-This costs nothing, but you manage hosting, rebuilds and per-customer access
-yourself.
+Changes made directly in the split repo are overwritten by the next split.
 
 ## Development
 
