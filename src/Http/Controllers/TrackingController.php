@@ -34,13 +34,13 @@ class TrackingController extends Controller
 
     private function recordEvent(Request $request, string $platformId, string $eventType): void
     {
-        RecordTrackingEvent::dispatch(
+        RecordTrackingEvent::dispatchForTracking(
             $platformId,
             $eventType,
-            $request->ip(),
+            (string) $request->ip(),
             (string) $request->userAgent(),
             $request->headers->get('referer'),
             $request->getSchemeAndHttpHost(),
-        )->onConnection(config('effyads.queue_connection'));
+        );
     }
 }

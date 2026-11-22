@@ -3,7 +3,9 @@
 namespace EffyAds\Laravel\Tests\Feature;
 
 use EffyAds\Laravel\Tests\TestCase;
+use EffyAds\Laravel\Jobs\RecordTrackingEvent;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
 
 class TrackingTest extends TestCase
@@ -45,5 +47,35 @@ class TrackingTest extends TestCase
         $this->get('/effyads/track/click/missing')->assertNotFound();
 
         Http::assertNothingSent();
+    }
+
+    public function test_sync_default_sends_the_event_after_the_response(): void
+    {
+        Bus::fake();
+        $this->createAd();
+
+        $this->get('/effyads/track/view/ad-1')->assertOk();
+
+        Bus::assertDispatchedAfterResponse(RecordTrackingEvent::class);
+    }
+
+    public function test_explicit_queue_connection_queues_the_event(): void
+    {
+        config(['effyads.queue_connection' => 'redis']);
+        Bus::fake();
+        $this->createAd();
+
+        $this->get('/effyads/track/view/ad-1')->assertOk();
+
+        Bus::assertDispatched(RecordTrackingEvent::class, fn ($job) => $job->connection === 'redis');
+        Bus::assertNotDispatchedAfterResponse(RecordTrackingEvent::class);
+    }
+
+    public function test_job_retries_on_a_real_queue(): void
+    {
+        $job = new RecordTrackingEvent('ad-1', 'view', '1.1.1.1', 'UA', null, 'https://site.test');
+
+        $this->assertSame(3, $job->tries);
+        $this->assertNotEmpty($job->backoff());
     }
 }

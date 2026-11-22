@@ -9,12 +9,15 @@ return [
 
     // Base URL of the EffyAds platform. Tracking events (view/click) are
     // POSTed to "{platform_url}/api/tracking".
-    'platform_url' => env('EFFYADS_PLATFORM_URL', 'https://effyads.com'),
+    'platform_url' => env('EFFYADS_PLATFORM_URL', 'https://app.effyads.com'),
 
-    // Queue connection used to dispatch tracking events asynchronously so a
-    // slow platform response never blocks the pixel/redirect request.
-    // Use "sync" to send inline instead (not recommended in production).
-    'queue_connection' => env('EFFYADS_QUEUE_CONNECTION', env('QUEUE_CONNECTION', 'sync')),
+    // Queue connection for tracking events (views/clicks reported to the
+    // platform). The default "sync" sends them right after the response has
+    // been delivered to the visitor, so it needs no queue worker and never
+    // slows down the pixel or click redirect. Only set this to a real queue
+    // connection (e.g. "redis", "database") if a worker is running for it,
+    // otherwise events pile up in the queue unsent.
+    'queue_connection' => env('EFFYADS_QUEUE_CONNECTION', 'sync'),
 
     // Disk (from config/filesystems.php) that uploaded ad media is stored on.
     'media_disk' => env('EFFYADS_MEDIA_DISK', 'public'),
