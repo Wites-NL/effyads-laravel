@@ -5,6 +5,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- Allow Guzzle 8 (`guzzlehttp/guzzle: ^7.2|^8.0`); Laravel 13 apps may already use it.
+
+## [1.0.0] - 2026-11-22
+
 ### Added
 - Published on Packagist: `composer require effyads/laravel` works without extra repository setup.
 - Laravel 13 support.

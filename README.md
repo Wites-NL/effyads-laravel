@@ -168,6 +168,10 @@ Tenant::find('groningen')->update(['effyads_api_key' => '<key from effyads:insta
 Connect each tenant domain as a separate website in the EffyAds dashboard,
 with that tenant's key.
 
+With this middleware the EffyAds routes, including the public tracking pixel
+and click redirect, only work on tenant domains. That is intended: on the
+central domain there is no site, so there are no advertisements to track.
+
 ## API surface
 
 All routes below require the `X-EffyAds-API-Key` header, compared with
@@ -191,6 +195,14 @@ Public routes (hit directly by visitors' browsers):
 
 Both tracking routes dispatch `EffyAds\Laravel\Jobs\RecordTrackingEvent`,
 which POSTs to `{EFFYADS_PLATFORM_URL}/api/tracking`.
+
+**Testing tip:** with the default `sync` connection the event is sent after
+the response, when the app terminates. In a feature test that makes several
+requests on the same app instance, these after-response callbacks can run
+more than once, so `Http::assertSentCount()` may count an event twice. This
+does not happen in production, where every request gets a fresh app. In your
+own tests, use `Bus::fake()` and `Bus::assertDispatchedAfterResponse()`, or set
+`effyads.queue_connection` to another connection and use `Queue::fake()`.
 
 ## Security
 
