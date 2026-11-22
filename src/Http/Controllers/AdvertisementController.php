@@ -2,6 +2,7 @@
 
 namespace EffyAds\Laravel\Http\Controllers;
 
+use Composer\InstalledVersions;
 use EffyAds\Laravel\Models\Advertisement;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -112,7 +113,7 @@ class AdvertisementController extends Controller
             'success' => true,
             'total_ads' => Advertisement::count(),
             'laravel_version' => app()->version(),
-            'package_version' => '1.0.0',
+            'package_version' => static::packageVersion(),
             'last_check' => now()->toDateTimeString(),
         ]);
     }
@@ -147,6 +148,15 @@ class AdvertisementController extends Controller
             'deleted_ads' => $deleted,
             'timestamp' => now()->toDateTimeString(),
         ]);
+    }
+
+    protected static function packageVersion(): string
+    {
+        if (class_exists(InstalledVersions::class) && InstalledVersions::isInstalled('effyads/laravel')) {
+            return InstalledVersions::getPrettyVersion('effyads/laravel') ?? 'unknown';
+        }
+
+        return 'unknown';
     }
 
     protected function validated(Request $request): array

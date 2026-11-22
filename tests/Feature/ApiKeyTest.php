@@ -29,4 +29,13 @@ class ApiKeyTest extends TestCase
 
         $this->getJson('/effyads/v1/sync/status', $this->apiHeaders(''))->assertForbidden();
     }
+
+    public function test_sync_status_reports_the_installed_package_version(): void
+    {
+        $version = \Composer\InstalledVersions::getPrettyVersion('effyads/laravel');
+
+        $this->getJson('/effyads/v1/sync/status', $this->apiHeaders())
+            ->assertOk()
+            ->assertJsonPath('package_version', $version);
+    }
 }
