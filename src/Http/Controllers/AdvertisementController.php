@@ -19,6 +19,8 @@ class AdvertisementController extends Controller
             'description' => ['nullable', 'string'],
             'link' => ['required', 'url'],
             'media_url' => ['nullable', 'url'],
+            'media_width' => ['nullable', 'integer', 'min:1'],
+            'media_height' => ['nullable', 'integer', 'min:1'],
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date'],
             'targeting' => ['nullable', 'array'],

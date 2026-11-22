@@ -3,6 +3,7 @@
 namespace EffyAds\Laravel;
 
 use EffyAds\Laravel\Console\Commands\InstallCommand;
+use EffyAds\Laravel\Support\ActiveAdvertisements;
 use EffyAds\Laravel\View\Components\EffyAd;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -15,6 +16,8 @@ class EffyAdsServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/effyads.php', 'effyads');
+
+        $this->app->scoped(ActiveAdvertisements::class);
     }
 
     public function boot(): void

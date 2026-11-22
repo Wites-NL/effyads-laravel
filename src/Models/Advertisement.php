@@ -16,6 +16,8 @@ class Advertisement extends Model
         'description',
         'link',
         'media_url',
+        'media_width',
+        'media_height',
         'start_date',
         'end_date',
         'targeting',
@@ -28,6 +30,8 @@ class Advertisement extends Model
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'last_synced_at' => 'datetime',
+        'media_width' => 'integer',
+        'media_height' => 'integer',
     ];
 
     /**
@@ -41,6 +45,36 @@ class Advertisement extends Model
     public function scopeForSite(Builder $query, ?string $site): Builder
     {
         return $query->where($this->qualifyColumn('site'), static::siteColumnValue($site));
+    }
+
+    /**
+     * Ads that may be shown right now: "active", or "scheduled" once the
+     * start date has passed, and in both cases not past the end date.
+     */
+    public function scopeCurrentlyActive(Builder $query): Builder
+    {
+        $now = now();
+
+        return $query
+            ->where(function (Builder $q) use ($now) {
+                $q->where($this->qualifyColumn('status'), 'active')
+                    ->orWhere(function (Builder $q) use ($now) {
+                        $q->where($this->qualifyColumn('status'), 'scheduled')
+                            ->whereNotNull($this->qualifyColumn('start_date'));
+                    });
+            })
+            ->where(fn (Builder $q) => $q->whereNull($this->qualifyColumn('start_date'))->orWhere($this->qualifyColumn('start_date'), '<=', $now))
+            ->where(fn (Builder $q) => $q->whereNull($this->qualifyColumn('end_date'))->orWhere($this->qualifyColumn('end_date'), '>=', $now));
+    }
+
+    /**
+     * Relative weight for random rotation (targeting.weight, default 1).
+     */
+    public function rotationWeight(): float
+    {
+        $weight = $this->targeting['weight'] ?? 1;
+
+        return is_numeric($weight) ? max(0.0, (float) $weight) : 1.0;
     }
 
     public function matchesZone(string $zone): bool
@@ -67,7 +101,9 @@ class Advertisement extends Model
 
     public function isCurrentlyActive(): bool
     {
-        if ($this->status !== 'active') {
+        $isScheduled = $this->status === 'scheduled' && $this->start_date !== null;
+
+        if ($this->status !== 'active' && ! $isScheduled) {
             return false;
         }
 

@@ -86,7 +86,20 @@ Then render one in any view:
 
 ```blade
 <x-effyads::ad zone="homepage-hero" />
+<x-effyads::ad zone="blog-sidebar" class="my-6" :width="300" :height="250" />
 ```
+
+- Shows advertisements with status `active`, or `scheduled` once the start
+  date has passed, within their start and end date.
+- When several advertisements match a zone, one is picked at random on every
+  render, weighted by `targeting.weight` (default 1, `0` = never). Set
+  `'rotation' => 'first'` in the config to always show the oldest match.
+- Extra attributes such as `class` are added to the wrapper `<div>`. The
+  image gets `loading="lazy"`, and `width`/`height` from the component or
+  from the advertisement's `media_width`/`media_height`.
+- All zones on a page share one database query.
+- With `APP_DEBUG=true`, a zone that is not in `config('effyads.zones')` logs
+  a warning.
 
 ### 7. Connect the site in the dashboard
 

@@ -1,8 +1,8 @@
 @if ($ad)
-    <div class="effyads-ad" data-zone="{{ $zone }}">
+    <div {{ $attributes->merge(['class' => 'effyads-ad']) }} data-zone="{{ $zone }}">
         <a href="{{ route('effyads.track.click', $ad->platform_id) }}" target="_blank" rel="noopener sponsored">
             @if ($ad->media_url)
-                <img src="{{ $ad->media_url }}" alt="{{ $ad->title }}">
+                <img src="{{ $ad->media_url }}" alt="{{ $ad->title }}" loading="lazy"@if ($imageWidth) width="{{ $imageWidth }}"@endif @if ($imageHeight) height="{{ $imageHeight }}"@endif>
             @else
                 {{ $ad->title }}
             @endif

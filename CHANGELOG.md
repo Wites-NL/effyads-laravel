@@ -27,6 +27,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   (`effyads.tracking.dedupe_seconds`) and skips bots
   (`effyads.tracking.bot_user_agents`).
 - `effyads.media_max_kb` (default 5120).
+- Random rotation between matching ads, weighted by `targeting.weight`
+  (`effyads.rotation`: `random` (default) or `first`).
+- `<x-effyads::ad>` accepts `class` (and other attributes), `width` and
+  `height`; images get `loading="lazy"`. New optional `media_width` and
+  `media_height` fields on advertisements (new migration).
+- Warning in the log (debug mode) for zones missing from `effyads.zones`.
 
 ### Changed
 - All required `illuminate/*` components are now listed in `composer.json`.
@@ -36,6 +42,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `QUEUE_CONNECTION`); sync events are sent after the response.
 - An already configured API key is masked in the installer output.
 - Views and clicks are only recorded for existing, active advertisements.
+- `scheduled` advertisements are shown once their start date has passed.
+- The component filters status and dates in SQL and loads active ads once per
+  site per request, instead of loading every active ad on every render.
 - Media uploads go to `effyads/{site}/` in multi-site installs.
 - The tracking job no longer uses `SerializesModels`.
 

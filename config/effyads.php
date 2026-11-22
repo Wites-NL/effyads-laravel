@@ -55,6 +55,11 @@ return [
         'bot_user_agents' => '/bot|crawl|spider|slurp|mediapartners|facebookexternalhit|embedly|preview|headless|lighthouse|pingdom|uptime|monitor|curl|wget|python-requests|go-http-client|httpclient|java\//i',
     ],
 
+    // Which ad a zone shows when several match: "random" picks one at random
+    // on every render (weighted by targeting.weight, default 1), "first"
+    // always shows the oldest matching ad.
+    'rotation' => env('EFFYADS_ROTATION', 'random'),
+
     // Named placement slots the <x-effyads::ad zone="..." /> component and the
     // targeting/options endpoint expose to the platform. WordPress targets by
     // taxonomy/post-type/page; a plain Laravel app has no such universal
