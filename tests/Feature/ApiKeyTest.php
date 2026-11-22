@@ -38,4 +38,11 @@ class ApiKeyTest extends TestCase
             ->assertOk()
             ->assertJsonPath('package_version', $version);
     }
+
+    public function test_sync_status_reports_no_site_without_resolvers(): void
+    {
+        $this->getJson('/effyads/v1/sync/status', $this->apiHeaders())
+            ->assertOk()
+            ->assertJson(['site' => null, 'site_url' => 'http://localhost']);
+    }
 }

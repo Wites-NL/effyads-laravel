@@ -2,6 +2,7 @@
 
 namespace EffyAds\Laravel\Tests;
 
+use EffyAds\Laravel\EffyAds;
 use EffyAds\Laravel\EffyAdsServiceProvider;
 use EffyAds\Laravel\Models\Advertisement;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,6 +13,13 @@ abstract class TestCase extends Orchestra
     use RefreshDatabase;
 
     protected const API_KEY = 'test-api-key-0123456789';
+
+    protected function tearDown(): void
+    {
+        EffyAds::flushResolvers();
+
+        parent::tearDown();
+    }
 
     protected function getPackageProviders($app): array
     {

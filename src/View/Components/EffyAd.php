@@ -2,6 +2,7 @@
 
 namespace EffyAds\Laravel\View\Components;
 
+use EffyAds\Laravel\EffyAds;
 use EffyAds\Laravel\Models\Advertisement;
 use Illuminate\View\Component;
 use Illuminate\View\View;
@@ -12,7 +13,8 @@ class EffyAd extends Component
 
     public function __construct(public string $zone)
     {
-        $this->ad = Advertisement::where('status', 'active')
+        $this->ad = Advertisement::forSite(EffyAds::site())
+            ->where('status', 'active')
             ->get()
             ->first(fn (Advertisement $ad) => $ad->isCurrentlyActive() && $ad->matchesZone($zone));
     }

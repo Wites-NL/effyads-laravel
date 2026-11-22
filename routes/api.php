@@ -7,7 +7,7 @@ use EffyAds\Laravel\Http\Middleware\VerifyEffyAdsApiKey;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('effyads/v1')
-    ->middleware(VerifyEffyAdsApiKey::class)
+    ->middleware([...config('effyads.route_middleware', []), VerifyEffyAdsApiKey::class])
     ->group(function () {
         Route::get('advertisements', [AdvertisementController::class, 'index']);
         Route::post('advertisements', [AdvertisementController::class, 'store']);

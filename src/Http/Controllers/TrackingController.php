@@ -2,6 +2,7 @@
 
 namespace EffyAds\Laravel\Http\Controllers;
 
+use EffyAds\Laravel\EffyAds;
 use EffyAds\Laravel\Jobs\RecordTrackingEvent;
 use EffyAds\Laravel\Models\Advertisement;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class TrackingController extends Controller
     // GET /effyads/track/click/{platform_id} — fires a click event, then redirects to the ad's target URL
     public function click(Request $request, string $platformId)
     {
-        $ad = Advertisement::where('platform_id', $platformId)->firstOrFail();
+        $ad = Advertisement::forSite(EffyAds::site($request))->where('platform_id', $platformId)->firstOrFail();
 
         $this->recordEvent($request, $platformId, 'click');
 

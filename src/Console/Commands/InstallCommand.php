@@ -2,8 +2,8 @@
 
 namespace EffyAds\Laravel\Console\Commands;
 
+use EffyAds\Laravel\EffyAds;
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
 
 class InstallCommand extends Command
 {
@@ -11,16 +11,21 @@ class InstallCommand extends Command
 
     protected $signature = 'effyads:install
         {--write-env : Add the EffyAds lines to .env (existing values are never overwritten)}
-        {--show-key : Show the full API key when one is already configured}';
+        {--show-key : Show the full API key when one is already configured}
+        {--site= : Multi-site: only generate and print an API key for this site, for the app to store}';
 
     protected $description = 'Publish the EffyAds config, generate an API key and print the .env lines';
 
     public function handle(): int
     {
+        if (($site = $this->option('site')) !== null) {
+            return $this->generateSiteKey((string) $site);
+        }
+
         $this->publishConfig();
 
         $existingKey = config('effyads.api_key');
-        $key = $existingKey ?: static::generateApiKey();
+        $key = $existingKey ?: EffyAds::generateApiKey();
 
         $lines = [
             'EFFYADS_API_KEY' => $key,
@@ -69,9 +74,22 @@ class InstallCommand extends Command
         return self::SUCCESS;
     }
 
-    public static function generateApiKey(): string
+    protected function generateSiteKey(string $site): int
     {
-        return Str::random(64);
+        if ($site === '') {
+            $this->error('--site needs a value, e.g. --site=groningen');
+
+            return self::FAILURE;
+        }
+
+        $this->line("New API key for site <comment>{$site}</comment>:");
+        $this->newLine();
+        $this->line('  '.EffyAds::generateApiKey());
+        $this->newLine();
+        $this->line('Store it where your EffyAds::resolveApiKeyUsing() resolver reads it for this site,');
+        $this->line('then paste it into the EffyAds dashboard when you connect this site.');
+
+        return self::SUCCESS;
     }
 
     protected function publishConfig(): void

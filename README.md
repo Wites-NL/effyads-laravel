@@ -103,6 +103,77 @@ expose share http://myapp.test
 ngrok http 80
 ```
 
+## Multiple sites in one Laravel app
+
+By default the package serves one site with one API key. A multi-tenant app
+(for example `groningen.example.nl` and `assen.example.nl`, each connected as
+its own website in the dashboard) needs every site to have its own
+advertisements and its own key. Otherwise all sites show the same ads, and a
+`sync/bulk` from one site deletes the ads of the others.
+
+Register two resolvers, usually in `AppServiceProvider::boot()`:
+
+```php
+use EffyAds\Laravel\EffyAds;
+use Illuminate\Http\Request;
+
+// Which site does this request belong to? null = no site.
+EffyAds::resolveSiteUsing(fn (Request $request): ?string => /* ... */);
+
+// Which API key must the platform send for this site?
+EffyAds::resolveApiKeyUsing(fn (?string $site): ?string => /* ... */);
+```
+
+Once a site resolver is set, every advertisement is stored with its site, and
+the API, the Blade component and the tracking routes only see that site's
+advertisements. `sync/bulk` only deletes within the site. `sync/status`
+returns `site` and `site_url`, so the dashboard can check that it talks to
+the right site. Without resolvers nothing changes.
+
+Generate a key per site and store it where your key resolver reads it:
+
+```bash
+php artisan effyads:install --site=groningen   # only prints a new key
+```
+
+### Example: stancl/tenancy
+
+The EffyAds routes are registered by the package, outside your tenant route
+file, so add the tenancy middleware to them in `config/effyads.php`:
+
+```php
+'route_middleware' => [
+    \Stancl\Tenancy\Middleware\InitializeTenancyByDomain::class,
+    \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,
+],
+```
+
+Then resolve the site and key from the current tenant. This example keeps the
+key in the tenant's `data` column as `effyads_api_key`:
+
+```php
+use App\Models\Tenant;
+use EffyAds\Laravel\EffyAds;
+
+public function boot(): void
+{
+    EffyAds::resolveSiteUsing(fn () => tenant()?->getTenantKey());
+
+    EffyAds::resolveApiKeyUsing(fn (?string $site) => $site
+        ? Tenant::find($site)?->effyads_api_key
+        : null);
+}
+```
+
+Store a key for each tenant, for example in `php artisan tinker`:
+
+```php
+Tenant::find('groningen')->update(['effyads_api_key' => '<key from effyads:install --site=groningen>']);
+```
+
+Connect each tenant domain as a separate website in the EffyAds dashboard,
+with that tenant's key.
+
 ## API surface
 
 All routes below require the `X-EffyAds-API-Key` header, compared with

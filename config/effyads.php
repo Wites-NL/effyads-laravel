@@ -19,6 +19,12 @@ return [
     // otherwise events pile up in the queue unsent.
     'queue_connection' => env('EFFYADS_QUEUE_CONNECTION', 'sync'),
 
+    // Extra middleware for all EffyAds routes (API and tracking). Multi-tenant
+    // apps add their tenant identification middleware here so the site
+    // resolver (EffyAds::resolveSiteUsing) sees the current tenant, e.g.
+    // [\Stancl\Tenancy\Middleware\InitializeTenancyByDomain::class].
+    'route_middleware' => [],
+
     // Disk (from config/filesystems.php) that uploaded ad media is stored on.
     'media_disk' => env('EFFYADS_MEDIA_DISK', 'public'),
 

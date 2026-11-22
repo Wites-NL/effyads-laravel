@@ -74,4 +74,12 @@ class AdvertisementApiTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.zones.0.name', 'homepage-hero');
     }
+
+    public function test_platform_id_stays_unique_for_a_single_site_install(): void
+    {
+        $this->createAd();
+
+        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->createAd();
+    }
 }

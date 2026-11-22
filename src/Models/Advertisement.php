@@ -2,6 +2,7 @@
 
 namespace EffyAds\Laravel\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Advertisement extends Model
@@ -9,6 +10,7 @@ class Advertisement extends Model
     protected $table = 'effyads_advertisements';
 
     protected $fillable = [
+        'site',
         'platform_id',
         'title',
         'description',
@@ -27,6 +29,19 @@ class Advertisement extends Model
         'end_date' => 'datetime',
         'last_synced_at' => 'datetime',
     ];
+
+    /**
+     * Single-site installs store site = '' (see the add_site migration).
+     */
+    public static function siteColumnValue(?string $site): string
+    {
+        return $site ?? '';
+    }
+
+    public function scopeForSite(Builder $query, ?string $site): Builder
+    {
+        return $query->where($this->qualifyColumn('site'), static::siteColumnValue($site));
+    }
 
     public function matchesZone(string $zone): bool
     {

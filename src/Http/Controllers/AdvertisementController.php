@@ -3,6 +3,7 @@
 namespace EffyAds\Laravel\Http\Controllers;
 
 use Composer\InstalledVersions;
+use EffyAds\Laravel\EffyAds;
 use EffyAds\Laravel\Models\Advertisement;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -30,10 +31,12 @@ class AdvertisementController extends Controller
     {
         $data = $this->validated($request);
 
-        $existing = Advertisement::where('platform_id', $data['platform_id'])->first();
+        $site = Advertisement::siteColumnValue(EffyAds::site($request));
+
+        $existing = Advertisement::forSite(EffyAds::site($request))->where('platform_id', $data['platform_id'])->first();
 
         $ad = Advertisement::updateOrCreate(
-            ['platform_id' => $data['platform_id']],
+            ['site' => $site, 'platform_id' => $data['platform_id']],
             $data + ['last_synced_at' => now()]
         );
 
@@ -46,9 +49,9 @@ class AdvertisementController extends Controller
     }
 
     // GET /effyads/v1/advertisements
-    public function index()
+    public function index(Request $request)
     {
-        $ads = Advertisement::all();
+        $ads = Advertisement::forSite(EffyAds::site($request))->get();
 
         return response()->json([
             'success' => true,
@@ -58,9 +61,9 @@ class AdvertisementController extends Controller
     }
 
     // GET /effyads/v1/advertisements/{platform_id}
-    public function show(string $platformId)
+    public function show(Request $request, string $platformId)
     {
-        $ad = Advertisement::where('platform_id', $platformId)->first();
+        $ad = $this->find($request, $platformId);
 
         if (! $ad) {
             return $this->notFound();
@@ -72,7 +75,7 @@ class AdvertisementController extends Controller
     // PUT /effyads/v1/advertisements/{platform_id}
     public function update(Request $request, string $platformId)
     {
-        $ad = Advertisement::where('platform_id', $platformId)->first();
+        $ad = $this->find($request, $platformId);
 
         if (! $ad) {
             return $this->notFound();
@@ -90,9 +93,9 @@ class AdvertisementController extends Controller
     }
 
     // DELETE /effyads/v1/advertisements/{platform_id}
-    public function destroy(string $platformId)
+    public function destroy(Request $request, string $platformId)
     {
-        $ad = Advertisement::where('platform_id', $platformId)->first();
+        $ad = $this->find($request, $platformId);
 
         if (! $ad) {
             return $this->notFound();
@@ -107,11 +110,13 @@ class AdvertisementController extends Controller
     }
 
     // GET /effyads/v1/sync/status
-    public function syncStatus()
+    public function syncStatus(Request $request)
     {
         return response()->json([
             'success' => true,
-            'total_ads' => Advertisement::count(),
+            'site' => EffyAds::site($request),
+            'site_url' => $request->getSchemeAndHttpHost(),
+            'total_ads' => Advertisement::forSite(EffyAds::site($request))->count(),
             'laravel_version' => app()->version(),
             'package_version' => static::packageVersion(),
             'last_check' => now()->toDateTimeString(),
@@ -130,7 +135,9 @@ class AdvertisementController extends Controller
         $platformIds = $validated['platform_ids'];
         $deleteMissing = $validated['delete_missing'] ?? true;
 
-        $toDelete = Advertisement::whereNotIn('platform_id', $platformIds)->get();
+        $site = EffyAds::site($request);
+
+        $toDelete = Advertisement::forSite($site)->whereNotIn('platform_id', $platformIds)->get();
 
         $deleted = [];
         if ($deleteMissing) {
@@ -142,8 +149,9 @@ class AdvertisementController extends Controller
 
         return response()->json([
             'success' => true,
+            'site' => $site,
             'platform_ads_count' => count($platformIds),
-            'local_ads_count' => Advertisement::count() + count($deleted),
+            'local_ads_count' => Advertisement::forSite($site)->count() + count($deleted),
             'deleted_count' => count($deleted),
             'deleted_ads' => $deleted,
             'timestamp' => now()->toDateTimeString(),
@@ -157,6 +165,11 @@ class AdvertisementController extends Controller
         }
 
         return 'unknown';
+    }
+
+    protected function find(Request $request, string $platformId): ?Advertisement
+    {
+        return Advertisement::forSite(EffyAds::site($request))->where('platform_id', $platformId)->first();
     }
 
     protected function validated(Request $request): array
