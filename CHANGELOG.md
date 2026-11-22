@@ -21,6 +21,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   identification) to all EffyAds routes.
 - `sync/status` returns `site` and `site_url`; `sync/bulk` returns `site`.
 
+- Rate limiters `effyads-api` (120/min per IP) and `effyads-tracking`
+  (60/min per IP), both configurable.
+- Tracking deduplicates per visitor, ad and event type
+  (`effyads.tracking.dedupe_seconds`) and skips bots
+  (`effyads.tracking.bot_user_agents`).
+- `effyads.media_max_kb` (default 5120).
+
 ### Changed
 - All required `illuminate/*` components are now listed in `composer.json`.
 - `sync/status` reports the installed package version instead of a hardcoded `1.0.0`.
@@ -28,3 +35,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `EFFYADS_QUEUE_CONNECTION` defaults to `sync` (no longer the app's
   `QUEUE_CONNECTION`); sync events are sent after the response.
 - An already configured API key is masked in the installer output.
+- Views and clicks are only recorded for existing, active advertisements.
+- Media uploads go to `effyads/{site}/` in multi-site installs.
+- The tracking job no longer uses `SerializesModels`.
+
+### Removed
+- **Breaking:** the `?api_key=` query parameter is no longer accepted by
+  default. Send the `X-EffyAds-API-Key` header (the EffyAds platform already
+  does). Set `EFFYADS_ALLOW_QUERY_API_KEY=true` to accept it temporarily.
+
+### Security
+- Media upload detects the MIME type from the bytes with `finfo`, checks the
+  file is a real image with `getimagesizefromstring`, derives the extension
+  from the detected type and never uses the client's filename or
+  `mime_type`. Previously a `.php` file sent with `mime_type=image/png` was
+  stored on the public disk.
+- API key failures return a generic `403 Unauthorized` without a reason.

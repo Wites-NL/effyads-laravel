@@ -4,10 +4,15 @@ use EffyAds\Laravel\Http\Controllers\AdvertisementController;
 use EffyAds\Laravel\Http\Controllers\MediaController;
 use EffyAds\Laravel\Http\Controllers\TargetingController;
 use EffyAds\Laravel\Http\Middleware\VerifyEffyAdsApiKey;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('effyads/v1')
-    ->middleware([...config('effyads.route_middleware', []), VerifyEffyAdsApiKey::class])
+    ->middleware([
+        ...config('effyads.route_middleware', []),
+        ThrottleRequests::class.':effyads-api',
+        VerifyEffyAdsApiKey::class,
+    ])
     ->group(function () {
         Route::get('advertisements', [AdvertisementController::class, 'index']);
         Route::post('advertisements', [AdvertisementController::class, 'store']);

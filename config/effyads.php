@@ -2,10 +2,18 @@
 
 return [
 
-    // Shared secret verified against the X-EffyAds-API-Key header (or ?api_key=
-    // query fallback) on every effyads/v1/* request. Generate one via
-    // `php artisan effyads:install` and paste it into the EffyAds dashboard.
+    // Shared secret verified against the X-EffyAds-API-Key header on every
+    // effyads/v1/* request. Generate one via `php artisan effyads:install`
+    // and paste it into the EffyAds dashboard.
     'api_key' => env('EFFYADS_API_KEY'),
+
+    // Temporarily also accept the key as ?api_key= in the URL. Off by default:
+    // keys in URLs end up in access and proxy logs. Logs a deprecation
+    // warning whenever it is used. Will be removed in a future version.
+    'allow_query_api_key' => env('EFFYADS_ALLOW_QUERY_API_KEY', false),
+
+    // Requests per minute per IP allowed on the effyads/v1 API.
+    'api_rate_limit' => env('EFFYADS_API_RATE_LIMIT', 120),
 
     // Base URL of the EffyAds platform. Tracking events (view/click) are
     // POSTed to "{platform_url}/api/tracking".
@@ -27,6 +35,25 @@ return [
 
     // Disk (from config/filesystems.php) that uploaded ad media is stored on.
     'media_disk' => env('EFFYADS_MEDIA_DISK', 'public'),
+
+    // Maximum size of an uploaded ad image, in kilobytes.
+    'media_max_kb' => env('EFFYADS_MEDIA_MAX_KB', 5120),
+
+    // Protection against inflated view and click counts.
+    'tracking' => [
+        // Requests per minute per IP on the public tracking routes.
+        'rate_limit' => env('EFFYADS_TRACKING_RATE_LIMIT', 60),
+
+        // The same visitor (IP + user agent) is counted once per ad per window.
+        'dedupe_seconds' => [
+            'view' => 1800,
+            'click' => 60,
+        ],
+
+        // User agents matching this regex (and empty user agents) are not counted.
+        // Set to null to count everything.
+        'bot_user_agents' => '/bot|crawl|spider|slurp|mediapartners|facebookexternalhit|embedly|preview|headless|lighthouse|pingdom|uptime|monitor|curl|wget|python-requests|go-http-client|httpclient|java\//i',
+    ],
 
     // Named placement slots the <x-effyads::ad zone="..." /> component and the
     // targeting/options endpoint expose to the platform. WordPress targets by

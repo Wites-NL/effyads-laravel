@@ -198,6 +198,26 @@ Public routes (hit directly by visitors' browsers):
 Both tracking routes dispatch `EffyAds\Laravel\Jobs\RecordTrackingEvent`,
 which POSTs to `{EFFYADS_PLATFORM_URL}/api/tracking`.
 
+## Security
+
+| Setting (`config/effyads.php`) | Default | Purpose |
+|---|---|---|
+| `api_rate_limit` | `120` | Requests per minute per IP on `effyads/v1` (`throttle:effyads-api`). |
+| `allow_query_api_key` | `false` | Temporarily accept `?api_key=` (logs a deprecation warning). Keys in URLs end up in logs, so use the header. |
+| `media_max_kb` | `5120` | Maximum size of an uploaded image. |
+| `tracking.rate_limit` | `60` | Requests per minute per IP on the tracking routes (`throttle:effyads-tracking`). |
+| `tracking.dedupe_seconds` | `view: 1800, click: 60` | The same visitor (IP + user agent) is counted once per ad per window. `0` disables. |
+| `tracking.bot_user_agents` | regex | Matching (and empty) user agents are not counted. `null` counts everything. |
+
+- **Media upload**: the file type is detected from the bytes, never from the
+  client's `filename` or `mime_type`. Only real JPEG, PNG, GIF and WebP
+  images are stored, under a random name with the matching extension.
+- **Tracking**: views and clicks are only recorded for advertisements that
+  exist and are active (for the current site). An unknown ad still gets the
+  pixel, but nothing is recorded.
+- **API key**: any failure returns the same `403 Unauthorized`, without a
+  reason.
+
 ## Differences from the WordPress plugin
 
 - **Targeting**: WordPress targets by taxonomy, post type and page. A Laravel
