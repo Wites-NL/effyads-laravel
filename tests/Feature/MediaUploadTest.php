@@ -63,7 +63,8 @@ class MediaUploadTest extends TestCase
         $this->assertCount(1, $files);
         $this->assertStringStartsWith('effyads/', $files[0]);
         $this->assertStringEndsWith('.png', $files[0]);
-        $this->assertStringNotContainsString('php', $files[0]);
+        // '.php', not 'php': the random file name can contain those letters by chance.
+        $this->assertStringNotContainsString('.php', $files[0]);
         $this->assertStringEndsWith('.png', $response->json('url'));
     }
 
