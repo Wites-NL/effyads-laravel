@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-23
+
 ### Added
 - Ad formats: `<x-effyads::ad zone="..." format="medium-rectangle" />` only
   shows advertisements made for that IAB size. Zones without `format` show
