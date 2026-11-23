@@ -28,11 +28,12 @@ class ActiveAdvertisements
 
     /**
      * Pick the ad to show in a zone, following config('effyads.rotation').
+     * With a format, only ads of that format qualify.
      */
-    public function pick(?string $site, string $zone): ?Advertisement
+    public function pick(?string $site, string $zone, ?string $format = null): ?Advertisement
     {
         $matches = $this->forSite($site)
-            ->filter(fn (Advertisement $ad) => $ad->matchesZone($zone))
+            ->filter(fn (Advertisement $ad) => $ad->matchesZone($zone) && $ad->matchesFormat($format))
             ->values();
 
         if ($matches->isEmpty()) {

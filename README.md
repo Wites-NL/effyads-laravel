@@ -44,6 +44,12 @@ EFFYADS_PLATFORM_URL=https://app.effyads.com
 EFFYADS_QUEUE_CONNECTION=sync  # optional, sync is the default
 ```
 
+Copy `EFFYADS_PLATFORM_URL` from the Laravel install page in the dashboard.
+It must be reachable from your server without logging in: a host behind
+password or Vercel deployment protection answers every tracking call with
+401, and no views or clicks are recorded. Failed tracking calls are logged
+as `[EffyAds] tracking event failed with status ...`.
+
 `EFFYADS_QUEUE_CONNECTION` decides how views and clicks reach EffyAds:
 
 - `sync` (default): sent right after the response has been delivered to the
@@ -81,6 +87,34 @@ Then render one in any view:
 - All zones on a page share one database query.
 - With `APP_DEBUG=true`, a zone that is not in `config('effyads.zones')` logs
   a warning.
+
+#### Ad formats
+
+Give a zone a standard ad size and it only shows advertisements made for that
+size (the format is chosen per advertisement in the dashboard):
+
+```blade
+<x-effyads::ad zone="blog-sidebar" format="medium-rectangle" />
+<x-effyads::ad zone="homepage-hero" format="leaderboard" />
+```
+
+| Format | Size |
+| --- | --- |
+| `leaderboard` | 728×90 |
+| `billboard` | 970×250 |
+| `medium-rectangle` | 300×250 |
+| `large-rectangle` | 336×280 |
+| `small-rectangle` | 180×150 |
+| `square` | 250×250 |
+| `wide-skyscraper` | 160×600 |
+| `half-page` | 300×600 |
+| `mobile-banner` | 320×50 |
+| `large-mobile-banner` | 320×100 |
+
+- A zone without `format` shows any advertisement, as before.
+- Advertisements set to "Any size" only appear in zones without `format`.
+- The wrapper gets `effyads-format-{format}` and the image the format's
+  `width`/`height`, so you can style each size.
 
 ### 6. Connect the site in the dashboard
 

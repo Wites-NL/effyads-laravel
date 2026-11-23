@@ -5,6 +5,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- Ad formats: `<x-effyads::ad zone="..." format="medium-rectangle" />` only
+  shows advertisements made for that IAB size. Zones without `format` show
+  any advertisement, as before. New migration adds a nullable `format` column;
+  run `php artisan migrate` after updating.
+- The wrapper gets an `effyads-format-{format}` class and the image the
+  format's width and height when the platform sent no dimensions.
+
 ## [1.0.1] - 2026-11-22
 
 ### Changed

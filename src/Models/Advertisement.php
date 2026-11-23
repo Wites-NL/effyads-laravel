@@ -9,12 +9,30 @@ class Advertisement extends Model
 {
     protected $table = 'effyads_advertisements';
 
+    /**
+     * Standard IAB display sizes (width, height), the same list as the
+     * platform's convex/adFormats.ts.
+     */
+    public const FORMATS = [
+        'leaderboard' => [728, 90],
+        'billboard' => [970, 250],
+        'medium-rectangle' => [300, 250],
+        'large-rectangle' => [336, 280],
+        'small-rectangle' => [180, 150],
+        'square' => [250, 250],
+        'wide-skyscraper' => [160, 600],
+        'half-page' => [300, 600],
+        'mobile-banner' => [320, 50],
+        'large-mobile-banner' => [320, 100],
+    ];
+
     protected $fillable = [
         'site',
         'platform_id',
         'title',
         'description',
         'link',
+        'format',
         'media_url',
         'media_width',
         'media_height',
@@ -75,6 +93,16 @@ class Advertisement extends Model
         $weight = $this->targeting['weight'] ?? 1;
 
         return is_numeric($weight) ? max(0.0, (float) $weight) : 1.0;
+    }
+
+    /**
+     * A slot that asks for a format only takes ads of exactly that format; a
+     * slot without one takes any ad. Ads without a format ("any size")
+     * therefore only appear in slots without a format.
+     */
+    public function matchesFormat(?string $format): bool
+    {
+        return $format === null || $format === '' || $this->format === $format;
     }
 
     public function matchesZone(string $zone): bool

@@ -18,6 +18,9 @@ class AdvertisementController extends Controller
             'title' => ['required', 'string'],
             'description' => ['nullable', 'string'],
             'link' => ['required', 'url'],
+            // Not limited to Advertisement::FORMATS: a newer platform may know
+            // formats this version does not, and that must not break the sync.
+            'format' => ['nullable', 'string', 'max:64'],
             'media_url' => ['nullable', 'url'],
             'media_width' => ['nullable', 'integer', 'min:1'],
             'media_height' => ['nullable', 'integer', 'min:1'],
@@ -176,7 +179,14 @@ class AdvertisementController extends Controller
 
     protected function validated(Request $request): array
     {
-        return Validator::make($request->all(), $this->rules())->validate();
+        $data = Validator::make($request->all(), $this->rules())->validate();
+
+        // The platform sends "" for "any size".
+        if (array_key_exists('format', $data) && $data['format'] === '') {
+            $data['format'] = null;
+        }
+
+        return $data;
     }
 
     protected function notFound()
